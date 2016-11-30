@@ -1,12 +1,12 @@
-var https = require('https');
-var http = require('http');
-var transporter = null;
+const https = require('https');
+const http = require('http');
+const zlib = require('zlib');
 
-
-var defaultConfig = {
-	'url': 'http://localhost:8000/gelf'
+const defaultConfig = {
+	'url': 'http://localhost:8000/gelf',
+	'gzip': false
 };
-var defaultMessage = {
+const defaultMessage = {
 	'version': '1.1',
 	'host': require('os').hostname(),
 	'short_message':'',
@@ -15,23 +15,24 @@ var defaultMessage = {
 	'level':1
 };
 
-var config;
+let transporter = null;
+let config = {};
 
-var SendMessage = function(_message, _level, _callback){
+const SendMessage = function(_message, _level, _callback){
 
 	if(transporter === null){
 		throw new Error('init() must be called first to initialize transporter');
 	}
 
-	var _options = Object.assign(config.url, {method: 'POST'}); 
-	var _request = transporter.request(_options);
+	let _options = Object.assign(config.url, {method: 'POST'}); 
+	let _request = transporter.request(_options);
 
 	if(_callback === undefined){
 		_callback = function(_err, _res){};
 	}
 
 	_request.on('error', function (_error) {
-		_callback(_error, null);   
+		_callback(_error, false);   
 	});
 	_request.on('response', function(_response){
 		if(_response.statusCode !== 202){
@@ -43,7 +44,7 @@ var SendMessage = function(_message, _level, _callback){
 		}
 	});
 
-	var _payload = Object.assign({},defaultMessage);
+	let _payload = Object.assign({},defaultMessage);
 
 	_payload.timestamp = Date.now() / 1000;
 
@@ -51,20 +52,26 @@ var SendMessage = function(_message, _level, _callback){
 		_payload.short_message = _message;
 	}
 	else{
-		_payload = Object.assign(_payload,_message);
+		_payload = FlattenObject(_payload,_message,"","_");
 	}
 
 	if(_level !== undefined && typeof _level === 'number'){
 		_payload.level = _level;
 	}
 
-	var _param = JSON.stringify(_payload);
-
-	console.log("Sending payload", _param);
-	_request.end(_param);
+	let _payloadString = JSON.stringify(_payload);
+		
+	if(config.gzip){
+		zlib.gzip(_payloadString, null, function(err, _payloadZipped){
+			_request.end(_payloadZipped);
+		});
+		return;
+	}
+	
+	_request.end(_payloadString);
 };
 
-var jsonReadAllValues = function(values, data, prefix, sep) {
+const FlattenObject = function(values, data, prefix, sep) {
 	if(prefix.charAt(0) !== sep){ 
 		prefix = sep + prefix; 
 	}
@@ -72,7 +79,7 @@ var jsonReadAllValues = function(values, data, prefix, sep) {
     for (var key in data) {
         var newKey = prefix + sep + key;
         if (data[key] instanceof Array || data[key] instanceof Object) {
-            jsonReadAllValues(values, data[key], newKey, sep);
+            FlattenObject(values, data[key], newKey, sep);
         }
         else {
             values[newKey] = data[key];
@@ -119,7 +126,6 @@ exports.alert = function(_message, _callback){
 exports.panic = function(_message, _callback){
 	SendMessage(_message,0,_callback);	
 };
-
 exports.metric = function(_label, _value, _callback){
 	if(typeof _value !== 'number'){
 		console.warn('Value is not a number. Charting will be impossible', _value);
@@ -127,15 +133,14 @@ exports.metric = function(_label, _value, _callback){
 
 	SendMessage({'short_message': 'metric', '_label':_label, '_value': _value},6,_callback);
 };
-
 exports.metrics = function(_values, _name, _callback){
 	var _additional_fields = {};
-	jsonReadAllValues(_additional_fields,_values,_name,'_');
+	FlattenObject(_additional_fields,_values,_name,'_');
 
 	_additional_fields.short_message = "metrics_" + _name;
 
 	SendMessage(_additional_fields,6,_callback);
 };
 
-exports.native = SendMessage;
+exports.send = SendMessage;
 
