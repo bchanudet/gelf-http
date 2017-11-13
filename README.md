@@ -16,8 +16,7 @@ Initialzes the module with the given configuration
 
 	var gl2 = require("gelf-http");
 	gl2.init({
-		url: 'http://localhost:8082/gelf',
-		gzip: true
+		url: 'http://localhost:8082/gelf'
 	});
 
 gelf-http supports both HTTP and HTTPS, depending on the protocol defined in the URL
@@ -62,3 +61,14 @@ So you don't need to remember which level is which number :)
         "ram_load":0.2984398,
         "db_connections":298
     });
+
+## Contribute 
+
+// TODO
+
+## Run unit tests
+
+```bash
+$ npm install
+$ mocha test
+```
