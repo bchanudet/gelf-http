@@ -61,7 +61,7 @@ describe('init()',function(){
 });
 
 
-describe('send() on the mock server', function(){
+describe('send() to a mock server', function(){
 
 	// Create Mock Graylog server
 	before(function(done){
@@ -248,52 +248,54 @@ describe('send() on the mock server', function(){
 	});
 });
 
-describe('send() on a production server', function(){
-	before(function(){
-		gelf3.init("");
-	});
+if(process.env.GELF_TEST_SERVER !== undefined){
+	describe('send() to a real server : ' + process.env.GELF_TEST_SERVER, function(){
+		before(function(){
+			gelf3.init(process.env.GELF_TEST_SERVER);
+		});
 
-	// Actual tests
-	it("should be able to send a default message", function(done){
-		gelf3.send("test",1,done);
-	});
-	it("should be able to send an advanced message", function(done){
-		gelf3.send({"short_message":"test_advanced","test":true},1,done);
-	});
-	it("should be able to send an flattened multidimensional message", function(done){
-		gelf3.send({"short_message":"test_multi","root":{"sub":{"sub":true}}},1,done);
-	});
-	// LEVELS
-	it("should be able to send a PANIC message", function(done){
-		gelf3.panic({"short_message":"test_panic","real":{"level":0}},done);
-	});
-	it("should be able to send a ALERT message", function(done){
-		gelf3.alert({"short_message":"test_alert","real":{"level":1}},done);
-	});
-	it("should be able to send a CRITICAL message", function(done){
-		gelf3.critical({"short_message":"test_critical","real":{"level":2}},done);
-	});
-	it("should be able to send a ERROR message", function(done){
-		gelf3.error({"short_message":"test_error","real":{"level":3}},done);
-	});
-	it("should be able to send a WARN message", function(done){
-		gelf3.warn({"short_message":"test_warn","real":{"level":4}},done);
-	});
-	it("should be able to send a NOTICE message", function(done){
-		gelf3.notice({"short_message":"test_notice","real":{"level":5}},done);
-	});
-	it("should be able to send a INFO message", function(done){
-		gelf3.info({"short_message":"test_info","real":{"level":6}},done);
-	});
-	it("should be able to send a DEBUG message", function(done){
-		gelf3.debug({"short_message":"test_debug","real":{"level":7}},done);
-	});
+		// Actual tests
+		it("should be able to send a default message", function(done){
+			gelf3.send("test",1,done);
+		});
+		it("should be able to send an advanced message", function(done){
+			gelf3.send({"short_message":"test_advanced","test":true},1,done);
+		});
+		it("should be able to send an flattened multidimensional message", function(done){
+			gelf3.send({"short_message":"test_multi","root":{"sub":{"sub":true}}},1,done);
+		});
+		// LEVELS
+		it("should be able to send a PANIC message", function(done){
+			gelf3.panic({"short_message":"test_panic","real":{"level":0}},done);
+		});
+		it("should be able to send a ALERT message", function(done){
+			gelf3.alert({"short_message":"test_alert","real":{"level":1}},done);
+		});
+		it("should be able to send a CRITICAL message", function(done){
+			gelf3.critical({"short_message":"test_critical","real":{"level":2}},done);
+		});
+		it("should be able to send a ERROR message", function(done){
+			gelf3.error({"short_message":"test_error","real":{"level":3}},done);
+		});
+		it("should be able to send a WARN message", function(done){
+			gelf3.warn({"short_message":"test_warn","real":{"level":4}},done);
+		});
+		it("should be able to send a NOTICE message", function(done){
+			gelf3.notice({"short_message":"test_notice","real":{"level":5}},done);
+		});
+		it("should be able to send a INFO message", function(done){
+			gelf3.info({"short_message":"test_info","real":{"level":6}},done);
+		});
+		it("should be able to send a DEBUG message", function(done){
+			gelf3.debug({"short_message":"test_debug","real":{"level":7}},done);
+		});
 
-	// METRICS
-	it("should be able to send a METRIC message", function(done){
-		gelf3.metric("cpu",50,done);
+		// METRICS
+		it("should be able to send a METRIC message", function(done){
+			gelf3.metric("cpu",50,done);
+		});
+		it("should be able to send a METRICS message", function(done){
+			gelf3.metrics("cpu",{"cores":[50,10,10,50],"average":30},done);
+		});
 	});
-	it("should be able to send a METRICS message", function(done){
-		gelf3.metrics("cpu",{"cores":[50,10,10,50],"average":30},done);
-	});
-});
+}
