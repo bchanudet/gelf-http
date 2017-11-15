@@ -12,7 +12,7 @@ Node module to send Graylog Information via HTTP. Because sometimes that's all y
 
 ## `init(url[,defaultMessage])`
 
-Initialzes the module with the given configuration
+Initializes the module with the given configuration
 
 	var gl2 = require("gelf-http");
 	gl2.init('http://localhost:8082/gelf');
@@ -83,7 +83,12 @@ gl2.metric("cpu_load",50);
 ```
 ## Contribute 
 
-// TODO
+### Issues
+I use the module in some of my personal/professional projects, so any major bug would be detected by myself. Anyway, submit an issue if you encounter any trouble. I'll be glad to help. :)
+
+### Code
+
+Fork the repository, do your modifications, and send a PR :) I don't intend to add much more features to this module, as it already does all I need. But if you have any idea, don't hesitate!
 
 ## Run unit tests
 
@@ -101,3 +106,7 @@ $ npm install
 $ env GELF_HTTP_SERVER="url_of_your_http_input"
 $ mocha test
 ```
+
+## Changelog
+
+- **1.0** (2017-11-15) :  Published to npmjs.com
