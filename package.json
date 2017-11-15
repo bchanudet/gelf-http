@@ -2,7 +2,7 @@
   "name": "gelf-http",
   "version": "1.0.0",
   "description": "Sending GELF to graylog node by HTTP",
-  "main": "gefl-http.js",
+  "main": "gelf-http.js",
   "scripts": {
     "test": "mocha"
   },
