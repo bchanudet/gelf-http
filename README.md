@@ -1,4 +1,4 @@
-# gelf-http
+# gelf-http [![Build Status](https://travis-ci.org/bchanudet/gelf-http.svg?branch=master)](https://travis-ci.org/bchanudet/gelf-http)
 Node module to send Graylog Information via HTTP. Because sometimes that's all you need.
 
 # configuration
